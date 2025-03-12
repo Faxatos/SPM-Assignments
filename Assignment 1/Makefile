@@ -1,6 +1,6 @@
 CXX                = g++ -std=c++17
 OPTFLAGS	   = -O3
-AUTOFLAGS          = 
+AUTOFLAGS          = -march=native -ffast-math
 AVXFLAGS           = 
 CXXFLAGS          += -Wall 
 INCLUDES	   = -I. -I./include
