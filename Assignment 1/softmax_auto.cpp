@@ -9,13 +9,14 @@ void softmax_auto(const float *input, float *output, size_t K) {
     // Find the maximum to stabilize the computation of the exponential
 	size_t i;
     float max_val = -std::numeric_limits<float>::infinity();
+	#pragma GCC unroll 4
     for (i = 0; i < K; ++i) {
 		max_val = std::max(max_val, input[i]);
     }
 
     // computes all exponentials with the shift of max_val and the total sum
     float sum = 0.0f;
-	#pragma GCC ivdep
+	#pragma GCC unroll 4
     for (i = 0; i < K; ++i) {
         output[i] = std::exp(input[i] - max_val);
         sum += output[i];
