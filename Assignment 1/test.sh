@@ -37,5 +37,7 @@ for val in "${values[@]}"; do
         ./softmax_auto $val
         echo -e "\t  -> Testing softmax_avx..."
         ./softmax_avx $val
+        echo -e "\t  -> Testing softmax_aligned_avx..."
+        ./softmax_aligned_avx $val
     done
 done
