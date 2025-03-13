@@ -14,8 +14,8 @@ void softmax_auto(const float *input, float *output, size_t K) {
     }
 
     // computes all exponentials with the shift of max_val and the total sum
-	#pragma GCC ivdep
     float sum = 0.0f;
+	#pragma GCC ivdep
     for (i = 0; i < K; ++i) {
         output[i] = std::exp(input[i] - max_val);
         sum += output[i];
