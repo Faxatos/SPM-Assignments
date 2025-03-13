@@ -10,7 +10,7 @@ iter_num=$1
 arg=$2
 
 #define test sets
-test_vals1=(128 1024 8192 131.072) #vals that are powers of 2
+test_vals1=(128 1024 8192 131072) #vals that are powers of 2
 test_vals2=(101 1001 10001 100001) #vals that are not powers of 2
 
 #clean and build
