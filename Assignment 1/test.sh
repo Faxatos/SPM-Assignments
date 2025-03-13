@@ -33,9 +33,9 @@ for val in "${values[@]}"; do
         echo -e "\t- Iteration $i:"
         echo -e "\t  -> Testing softmax_plain..."
         ./softmax_plain $val
-        echo -e "\t  -> Testing softmax_avx..."
-        ./softmax_avx $val
         echo -e "\t  -> Testing softmax_auto..."
         ./softmax_auto $val
+        echo -e "\t  -> Testing softmax_avx..."
+        ./softmax_avx $val
     done
 done
