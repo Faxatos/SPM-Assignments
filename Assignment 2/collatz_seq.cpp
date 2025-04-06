@@ -6,6 +6,7 @@
 
 using ull = unsigned long long;
 
+//collatz steps for a given number
 ull collatz_steps(ull n) {
     ull steps = 0;
     while (n != 1) {
@@ -15,6 +16,7 @@ ull collatz_steps(ull n) {
     return steps;
 }
 
+//max collatz steps for a given range
 ull max_collatz_steps_in_range(ull lower, ull upper) {
     ull max_steps = 0;
     for (ull i = lower; i <= upper; ++i) {
@@ -44,11 +46,12 @@ int main(int argc, char* argv[]) {
     
     std::vector<std::pair<ull, ull>> ranges;
 
+    //parsing ranges
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         size_t dash = arg.find('-');
         if (dash == std::string::npos) {
-            std::cerr << "Err: argument must be in the form lower-upper; skipping range\n";
+            std::cerr << "Err: argument must be in the form lower-upper; skipping range." << std::endl;
             continue;
         }
 
