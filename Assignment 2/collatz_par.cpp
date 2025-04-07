@@ -31,6 +31,39 @@ ull max_collatz_steps_in_range(ull lower, ull upper) {
     return max_steps;
 }
 
+void process_range_dynamic(const std::vector<std::pair<ull, ull>>& ranges, size_t num_threads, ull task_size) {
+    // Initialize the thread pool with the specified number of threads
+    ThreadPool TP(num_threads);
+    std::vector<std::future<ull>> futures;
+    std::vector<ull> range_max_results(ranges.size());
+
+    // Enqueue tasks for each sub-range within the specified ranges
+    for (size_t i = 0; i < ranges.size(); ++i) {
+        ull lower = ranges[i].first;
+        ull upper = ranges[i].second;
+
+        for (ull start = lower; start <= upper; start += task_size) {
+            ull end = std::min(start + task_size - 1, upper);
+            futures.emplace_back(TP.enqueue([start, end]() {
+                return max_collatz_steps_in_range(start, end);
+            }));
+        }
+
+        // Collect and merge results for the current range
+        ull max_steps = 0;
+        for (size_t j = 0; j < futures.size(); ++j) {
+            max_steps = std::max(max_steps, futures[j].get());
+        }
+        range_max_results[i] = max_steps;
+        futures.clear(); // Clear futures for the next range
+    }
+
+    //print the maximum for each range
+    for (size_t r = 0; r < ranges.size(); ++r) {
+        std::cout << ranges[r].first << "-" << ranges[r].second << ": " << range_max_results[r] << std::endl;
+    }
+}
+
 // Function for static scheduling using block-cyclic task distribution
 void process_ranges_static_block_cyclic(const std::vector<std::pair<ull, ull>>& ranges, ull task_size, size_t num_threads) {
     // This vector will store the global maximum for each range
@@ -45,9 +78,9 @@ void process_ranges_static_block_cyclic(const std::vector<std::pair<ull, ull>>& 
         futures.emplace_back(std::async(std::launch::async, [=, &ranges]() -> std::vector<ull> {
             std::vector<ull> partial_results(ranges.size(), 0);
 
-            for (size_t i = 0; i < ranges.size(); i++) {
-                ull lower = ranges[i].first;
-                ull upper   = ranges[i].second;
+            for (size_t r = 0; r < ranges.size(); r++) {
+                ull lower = ranges[r].first;
+                ull upper   = ranges[r].second;
                 ull range_length = upper - lower + 1;
                 // Calculate the number of blocks needed for this range
                 ull rangeBlocksNumber = (range_length + task_size - 1) / task_size;
@@ -56,7 +89,7 @@ void process_ranges_static_block_cyclic(const std::vector<std::pair<ull, ull>>& 
                     ull block_start = lower + t * task_size;
                     ull block_end   = std::min(block_start + task_size - 1, upper);
                     ull res  = max_collatz_steps_in_range(block_start, block_end);
-                    partial_results[i] = std::max(partial_results[i], res);
+                    partial_results[r] = std::max(partial_results[r], res);
                 }
             }
             return partial_results;
@@ -67,8 +100,8 @@ void process_ranges_static_block_cyclic(const std::vector<std::pair<ull, ull>>& 
     for (auto& f : futures) {
         std::vector<ull> thread_results = f.get();
         std::lock_guard<std::mutex> lock(result_mutex);
-        for (size_t i = 0; i < ranges.size(); ++i) {
-            range_max_results[i] = std::max(range_max_results[i], thread_results[i]);
+        for (size_t r = 0; r < ranges.size(); ++r) {
+            range_max_results[r] = std::max(range_max_results[r], thread_results[r]);
         }
     }
 
@@ -143,7 +176,9 @@ void process_ranges(const std::vector<std::pair<ull, ull>>& ranges, bool dynamic
 
     }
     else{ //static
+        TIMERSTART(process_ranges_static_block_cyclic);
         process_ranges_static_block_cyclic(ranges, task_size, num_threads);
+        TIMERSTOP(process_ranges_static_block_cyclic);
         //process_ranges_static_block(ranges, num_threads);
     }
 }
@@ -210,9 +245,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    TIMERSTART(processRanges);
     process_ranges(ranges, dynamic, num_threads, task_size);
-    TIMERSTOP(processRanges);
 
     return 0;
 }
