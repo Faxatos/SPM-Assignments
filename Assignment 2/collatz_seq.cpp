@@ -33,8 +33,7 @@ void processRanges(const std::vector<std::pair<ull, ull>>& ranges) {
         ull lower = range.first;
         ull upper = range.second;
         ull max_steps = max_collatz_steps_in_range(lower, upper);
-        std::cout << "Range: " << lower << "-" << upper 
-                  << "; max Collatz steps = " << max_steps << std::endl;
+        std::cout << lower << "-" << upper << ": " << max_steps << std::endl;
     }
 }
 
