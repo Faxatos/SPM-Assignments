@@ -173,7 +173,9 @@ void process_ranges_static_block(const std::vector<std::pair<ull, ull>>& ranges,
 
 void process_ranges(const std::vector<std::pair<ull, ull>>& ranges, bool dynamic, size_t num_threads, ull task_size) {
     if (dynamic) {
-
+        TIMERSTART(process_range_dynamic)
+        process_range_dynamic(ranges, task_size, num_threads);
+        TIMERSTOP(process_range_dynamic)
     }
     else{ //static
         TIMERSTART(process_ranges_static_block_cyclic);
